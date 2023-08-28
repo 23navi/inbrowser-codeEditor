@@ -1,13 +1,22 @@
 import { useState } from "react";
 function App() {
-  const [input,setInput] = useState("") // Code which user will type into the textbox
+  const [input, setInput] = useState(""); // Code which user will type into the textbox
+  const [code, setCode] = useState(""); // Transpiled Code which will be displayed after user submits the textarea
+
+  const handleClick = () => {
+    console.log(input);
+    setInput("");
+  };
   return (
     <div>
-      <textarea></textarea>
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      ></textarea>
       <div>
-        <button>Submit</button>
+        <button onClick={handleClick}>Submit</button>
       </div>
-      <pre></pre>
+      <pre>{code}</pre>
     </div>
   );
 }
