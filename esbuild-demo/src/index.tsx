@@ -1,17 +1,34 @@
 import ReactDOM from "react-dom/client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import * as esbuild from "esbuild-wasm";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
 const App = () => {
+  const serviceRef = useRef<any>();
   const [code, setCode] = useState("");
   const [input, setInput] = useState("");
-  const onClick = () => {
-    console.log("input");
-    setCode(input);
+  useEffect(() => {
+    startService();
+  }, []);
+  const startService = async () => {
+    serviceRef.current = await esbuild.startService({
+      worker: true,
+      wasmURL: "/esbuild.wasm", // we have it in public folder
+    });
   };
+
+  const onClick = async () => {
+    if (!serviceRef.current) return;
+    const result = await serviceRef.current.transform(input, {
+      loader: "jsx",
+      target: "es2015",
+    });
+    setCode(result.code);
+  };
+
   return (
     <div>
       <textarea
