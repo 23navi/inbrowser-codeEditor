@@ -9,7 +9,7 @@ export const unpkgPathPlugin = () => {
         return { path: args.path, namespace: "a" };
       });
 
-      build.onLoad({ filter: /.*/ }, async (args: any) => {
+      build.onLoad({ filter: /.*/, namespace: "a" }, async (args: any) => {
         console.log("onLoad", args);
 
         if (args.path === "index.js") {
