@@ -7,7 +7,7 @@ export const unpkgPathPlugin = () => {
     setup(build: esbuild.PluginBuild) {
       // onReslove
       build.onResolve({ filter: /.*/ }, async (args: any) => {
-        // console.log("onResole", args);
+        console.log({ importer: args });
         return { path: args.path, namespace: "a" };
       });
 
