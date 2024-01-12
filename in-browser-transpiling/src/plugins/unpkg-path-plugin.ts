@@ -45,12 +45,28 @@ export const unpkgPathPlugin = () => {
           };
         }
 
+        // Check if the data is in the cache
+        const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
+          args.path
+        );
+
+        if (cachedResult) {
+          return cachedResult;
+        }
+
+        // Fetch the data from unpkg.com. We need to fetch the data from unpkg.com because we are not using the cache.
         const { data, request } = await axios.get(args.path);
-        return {
+        const result: esbuild.OnLoadResult = {
           loader: "jsx",
           contents: data,
           resolveDir: new URL("./", request.responseURL).pathname,
         };
+
+        // Cache the result
+        await fileCache.setItem(args.path, result);
+
+        // return the result
+        return result;
       });
     },
   };
