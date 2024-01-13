@@ -29,9 +29,26 @@ export const fetchPlugin = (userCode: string) => {
 
         // Fetch the data from unpkg.com. We need to fetch the data from unpkg.com because we are not using the cache.
         const { data, request } = await axios.get(args.path);
+
+        const fileType = args.path.match(/.css$/) ? "css" : "jsx";
+
+        // this will be only used for css files. We need to return the contents of the css file.
+        const escapedData = data
+          .replace(/\n/g, "")
+          .replace(/"/g, '\\"')
+          .replace(/'/g, "\\'");
+
+        const contents =
+          fileType === "css"
+            ? `
+          const style = document.createElement('style');
+          style.innerText = '${escapedData}';
+          document.head.appendChild(style);
+          `
+            : data;
         const result: esbuild.OnLoadResult = {
           loader: "jsx",
-          contents: data,
+          contents,
           resolveDir: new URL("./", request.responseURL).pathname,
         };
 
