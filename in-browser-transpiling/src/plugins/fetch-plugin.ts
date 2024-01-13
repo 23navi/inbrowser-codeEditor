@@ -10,7 +10,9 @@ export const fetchPlugin = (userCode: string) => {
   return {
     name: "fetch-plugin",
     setup(build: esbuild.PluginBuild) {
-      build.onLoad({ filter: /.css$/ }, async (args: any) => {
+      build.onLoad({ filter: /.*/ }, async (args: any) => {
+        // This is the first onLoad which manages cache returns. It will only return if there is a cache hit, else it will let other onLoad take charge
+
         // Check if the data is in the cache
         const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
           args.path
@@ -20,6 +22,10 @@ export const fetchPlugin = (userCode: string) => {
           return cachedResult;
         }
 
+        return null;
+      });
+
+      build.onLoad({ filter: /.css$/ }, async (args: any) => {
         // Fetch the data from unpkg.com. We need to fetch the data from unpkg.com because we are not using the cache.
         const { data, request } = await axios.get(args.path);
 
@@ -56,15 +62,6 @@ export const fetchPlugin = (userCode: string) => {
       });
 
       build.onLoad({ filter: /.*/ }, async (args: any) => {
-        // Check if the data is in the cache
-        const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
-          args.path
-        );
-
-        if (cachedResult) {
-          return cachedResult;
-        }
-
         // Fetch the data from unpkg.com. We need to fetch the data from unpkg.com because we are not using the cache.
         const { data, request } = await axios.get(args.path);
 
