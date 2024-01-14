@@ -53,6 +53,7 @@ const App = () => {
       <div>
         <pre>{code}</pre>
       </div>
+      <iframe title="test" src="/test.html" />
     </div>
   );
 };
