@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(
 
 const App = () => {
   const serviceRef = useRef<any>();
-  const [code, setCode] = useState("");
+  const iframeRef = useRef<any>();
   const [input, setInput] = useState("");
   useEffect(() => {
     startService();
@@ -21,6 +21,25 @@ const App = () => {
       wasmURL: "/esbuild.wasm", // we have it in public folder
     });
   };
+
+  const html = `
+  <html>
+  <head> </head>
+  <body>
+    <div id="root">
+      <script>
+        window.addEventListener(
+          "message",
+          (event) => {
+            eval(event.data);
+          },
+          false
+        );
+      </script>
+    </div>
+  </body>
+</html>
+  `;
 
   const onClick = async () => {
     if (!serviceRef.current) return; // This will be used on client browser, when conver it clicked. There can be a chance that startService is not ready yet.
@@ -39,9 +58,17 @@ const App = () => {
         global: "window",
       },
     });
-    console.log(buildResult.outputFiles[0]);
-    setCode(buildResult.outputFiles[0].text);
+    iframeRef.current.contentWindow.postMessage(
+      buildResult.outputFiles[0].text,
+      "*"
+    );
   };
+
+  // const html = `
+  // <script>
+  //  ${code}
+  // </script>
+  // `;
 
   return (
     <div>
@@ -50,10 +77,13 @@ const App = () => {
         onChange={(e) => setInput(e.target.value)}
       ></textarea>
       <button onClick={() => onClick()}>Convert to code</button>
-      <div>
-        <pre>{code}</pre>
-      </div>
-      <iframe title="test" src="/test.html" />
+      <div></div>
+      <iframe
+        title="test"
+        srcDoc={html}
+        sandbox="allow-scripts"
+        ref={iframeRef}
+      />
     </div>
   );
 };
