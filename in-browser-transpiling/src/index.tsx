@@ -23,22 +23,31 @@ const App = () => {
   };
 
   const html = `
-  <html>
-  <head> </head>
-  <body>
-    <div id="root">
-      <script>
-        window.addEventListener(
-          "message",
-          (event) => {
-            eval(event.data);
-          },
-          false
-        );
-      </script>
-    </div>
-  </body>
-</html>
+      <html>
+      <head> </head>
+      <body>
+        <div id="root">
+          <script>
+            window.addEventListener(
+              "message",
+              (event) => {
+                try {
+                  eval(event.data);
+                } catch (error) {
+                  const root = document.querySelector("#root");
+                  root.innerHTML =
+                    '<div style="color:red;"><h4>Runtime error</h4>' +
+                    error +
+                    "</div>";
+                  console.error(error);
+                }
+              },
+              false
+            );
+          </script>
+        </div>
+      </body>
+    </html>
   `;
 
   const onClick = async () => {
@@ -63,12 +72,6 @@ const App = () => {
       "*"
     );
   };
-
-  // const html = `
-  // <script>
-  //  ${code}
-  // </script>
-  // `;
 
   return (
     <div>
