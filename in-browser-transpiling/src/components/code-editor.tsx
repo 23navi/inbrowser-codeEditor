@@ -11,7 +11,15 @@ const CodeEditor = ({ initialValue }: Props) => {
       language="javascript" // To give syntax highlighting and auto complete
       theme="dark" // dark | light (default)
       value={initialValue} //This is called value but it is only initial value.
-      options={{ wordWrap: "false", minimap: { enabled: false } }}
+      options={{
+        wordWrap: "on", // This will prevent code to overflow.
+        minimap: { enabled: false }, // Disable the small code preview on top right corner.
+        showUnused: false, // Disable unused code highlight.
+        folding: false, // Remove extra white space on left hand side before line number
+        lineNumbersMinChars: 3, // Reduce the gap between line number and start of code for that line
+        fontSize: 16, // Change the font size of editor
+        scrollBeyondLastLine: false, // This will prevent the editor from scrolling beyond last line.
+      }}
     />
   );
 };
