@@ -2,6 +2,8 @@ import { useRef } from "react";
 import MonacoEditor from "@monaco-editor/react";
 // import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 import type { EditorDidMount } from "@monaco-editor/react";
+import prettier from "prettier";
+import parser from "prettier/parser-babel";
 interface ICodeEditorProps {
   initialValue: string;
   onChange: (value: string) => void;
@@ -27,7 +29,20 @@ const CodeEditor = ({ initialValue, onChange }: ICodeEditorProps) => {
   };
 
   const onFormatClick = () => {
-    console.log(editorRef.current.getModel()?.getValue());
+    // Get the unformated code from the editor
+    const unformatedCode = editorRef.current.getModel()?.getValue();
+
+    // format the code using prettier
+    const formatedCode = prettier.format(unformatedCode, {
+      parser: "babel",
+      plugins: [parser],
+      useTabs: false,
+      singleQuote: true,
+      semi: true,
+    });
+
+    // set the codeEditor code to formated code
+    editorRef.current.setValue(formatedCode);
   };
 
   return (
