@@ -1,3 +1,4 @@
+import "./code-editor.css";
 import { useRef } from "react";
 import MonacoEditor from "@monaco-editor/react";
 // import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
@@ -46,8 +47,13 @@ const CodeEditor = ({ initialValue, onChange }: ICodeEditorProps) => {
   };
 
   return (
-    <div>
-      <button onClick={onFormatClick}>Format</button>
+    <div className="editor-wrapper">
+      <button
+        className="button button-format is-primary is-small"
+        onClick={onFormatClick}
+      >
+        Format
+      </button>
       <MonacoEditor
         editorDidMount={onEditorDidMount} // Will run when code editor is first mounted into the DOM
         height="300px" // Default the editor will be of 0 height
