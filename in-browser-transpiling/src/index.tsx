@@ -5,6 +5,7 @@ import * as esbuild from "esbuild-wasm";
 import { unpkgPathPlugin } from "./plugins/unpkg-path-plugin";
 import { fetchPlugin } from "./plugins/fetch-plugin";
 import CodeEditor from "./components/code-editor";
+import Preview from "./components/preview";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -12,8 +13,8 @@ const root = ReactDOM.createRoot(
 
 const App = () => {
   const serviceRef = useRef<any>();
-  const iframeRef = useRef<any>();
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState("const a =10; console.log(a);");
+  const [code, setCode] = useState("");
   useEffect(() => {
     startService();
   }, []);
@@ -23,34 +24,6 @@ const App = () => {
       wasmURL: "/esbuild.wasm", // we have it in public folder
     });
   };
-
-  const html = `
-      <html>
-      <head> </head>
-      <body>
-        <div id="root">
-          <script>
-            window.addEventListener(
-              "message",
-              (event) => {
-                try {
-                  eval(event.data);
-                } catch (error) {
-                  const root = document.querySelector("#root");
-                  root.innerHTML =
-                    '<div style="color:red;"><h4>Runtime error</h4>' +
-                    error +
-                    "</div>";
-                  console.error(error);
-                }
-              },
-              false
-            );
-          </script>
-        </div>
-      </body>
-    </html>
-  `;
 
   const onClick = async () => {
     if (!serviceRef.current) return; // This will be used on client browser, when conver it clicked. There can be a chance that startService is not ready yet.
@@ -69,10 +42,7 @@ const App = () => {
         global: "window",
       },
     });
-    iframeRef.current.contentWindow.postMessage(
-      buildResult.outputFiles[0].text,
-      "*"
-    );
+    setCode(buildResult.outputFiles[0].text);
   };
 
   return (
@@ -83,18 +53,9 @@ const App = () => {
           setInput(value);
         }}
       />
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      ></textarea>
       <button onClick={() => onClick()}>Convert to code</button>
       <div></div>
-      <iframe
-        title="test"
-        srcDoc={html}
-        sandbox="allow-scripts"
-        ref={iframeRef}
-      />
+      <Preview code={code} />
     </div>
   );
 };
