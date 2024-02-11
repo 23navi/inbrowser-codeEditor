@@ -2,6 +2,7 @@ import { useState } from "react";
 import bundler from "../bundler";
 import CodeEditor from "./code-editor";
 import Preview from "./preview";
+import Resizable from "./resizable";
 
 interface CodeCellProps {
   initialCode: string;
@@ -17,17 +18,19 @@ function CodeCell({ initialCode }: CodeCellProps) {
   };
 
   return (
-    <div>
-      <CodeEditor
-        initialValue={initialCode}
-        onChange={(value) => {
-          setInput(value);
-        }}
-      />
-      <button onClick={() => onClick()}>Convert to code</button>
-      <div></div>
-      <Preview code={code} />
-    </div>
+    <Resizable direction="vertical">
+      <div>
+        <CodeEditor
+          initialValue={initialCode}
+          onChange={(value) => {
+            setInput(value);
+          }}
+        />
+        <button onClick={() => onClick()}>Convert to code</button>
+        <div></div>
+        <Preview code={code} />
+      </div>
+    </Resizable>
   );
 }
 
