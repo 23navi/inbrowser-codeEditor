@@ -19,14 +19,14 @@ function CodeCell({ initialCode }: CodeCellProps) {
 
   return (
     <Resizable direction="vertical">
-      <div>
+      <div style={{ height: "100%", display: "flex", flexDirection: "row" }}>
         <CodeEditor
           initialValue={initialCode}
           onChange={(value) => {
             setInput(value);
           }}
         />
-        <button onClick={() => onClick()}>Convert to code</button>
+        {/* <button onClick={() => onClick()}>Convert to code</button> */}
         <div></div>
         <Preview code={code} />
       </div>

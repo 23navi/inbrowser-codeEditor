@@ -7,7 +7,12 @@ interface ResizableProps {
 }
 
 const Resizable = ({ direction, children }: ResizableProps) => {
-  return <div>{children}</div>;
+  return (
+    // Note: width="100%" doesn't work for ResizableBox so we are using Infinity
+    <ResizableBox resizeHandles={["s"]} width={Infinity} height={300}>
+      {children}
+    </ResizableBox>
+  );
 };
 
 export default Resizable;
