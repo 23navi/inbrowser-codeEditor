@@ -56,7 +56,7 @@ const CodeEditor = ({ initialValue, onChange }: ICodeEditorProps) => {
       </button>
       <MonacoEditor
         editorDidMount={onEditorDidMount} // Will run when code editor is first mounted into the DOM
-        height="300px" // Default the editor will be of 0 height
+        height="100%" // Default the editor will be of 0 height
         language="javascript" // To give syntax highlighting and auto complete
         theme="dark" // dark | light (default)
         value={initialValue} //This is called value but it is only initial value.

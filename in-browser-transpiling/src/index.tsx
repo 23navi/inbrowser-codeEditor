@@ -10,8 +10,6 @@ const App = () => {
   return (
     <div>
       <CodeCell initialCode="const a=10;"></CodeCell>
-      <CodeCell initialCode="const a=10;"></CodeCell>
-      <CodeCell initialCode="const a=10;"></CodeCell>
     </div>
   );
 };

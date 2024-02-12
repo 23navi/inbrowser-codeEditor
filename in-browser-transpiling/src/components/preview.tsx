@@ -1,12 +1,13 @@
 // This component will house the iframe which will display the output of user's code
 
+import "./preview.css";
 import { useEffect, useRef } from "react";
 
 const html = `
-<html>
+<html style="width: 100%; height: 100%;">
 <head> </head>
 <body>
-  <div id="root">
+  <div id="root" >
     <script>
       window.addEventListener(
         "message",
@@ -43,12 +44,15 @@ const Preview = ({ code }: PreviewProps) => {
   }, [code]);
 
   return (
-    <iframe
-      title="test"
-      srcDoc={html}
-      sandbox="allow-scripts"
-      ref={iframeRef}
-    />
+    <div className={"iframe-wrapper"}>
+      <iframe
+        // style={{ backgroundColor: "white" }}
+        title="test"
+        srcDoc={html}
+        sandbox="allow-scripts"
+        ref={iframeRef}
+      />
+    </div>
   );
 };
 
