@@ -40,7 +40,11 @@ const Preview = ({ code }: PreviewProps) => {
 
   useEffect(() => {
     iframeRef.current.srcdoc = html;
-    iframeRef.current.contentWindow.postMessage(code, "*");
+
+    // This is to give iframe time to setup message listener inside the iframe
+    setTimeout(() => {
+      iframeRef.current.contentWindow.postMessage(code, "*");
+    }, 50);
   }, [code]);
 
   return (

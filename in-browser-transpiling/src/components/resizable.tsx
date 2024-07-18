@@ -9,20 +9,29 @@ interface ResizableProps {
 
 const Resizable = ({ direction, children }: ResizableProps) => {
   const [innerHeight, setInnerHeight] = useState(window.innerHeight);
-  const [innerWidth, setInnerWidth] = useState(window.innerWidth);
+  // const [innerWidth, setInnerWidth] = useState(window.innerWidth);
+  const [width, setWidth] = useState(window.innerWidth * 0.75);
 
   useEffect(() => {
-    const resize = () => {
-      setInnerHeight(window.innerHeight);
-      setInnerWidth(window.innerWidth);
+    let timer: any;
+    const resizeListner = () => {
+      timer = setTimeout(() => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        setInnerHeight(window.innerHeight);
+        if (window.innerWidth * 0.75 < width) {
+          setWidth(window.innerWidth * 0.75);
+        }
+      }, 1000);
     };
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", resizeListner);
 
     // Clean up function, which runs when the component is de-mount
     return () => {
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", resizeListner);
     };
-  }, []);
+  }, [width]);
 
   let resizableProps: ResizableBoxProps;
   if (direction === "vertical") {
@@ -37,11 +46,14 @@ const Resizable = ({ direction, children }: ResizableProps) => {
   } else {
     resizableProps = {
       className: "resize-horizontal",
-      width: innerWidth * 0.75,
+      width,
       height: Infinity,
       minConstraints: [innerHeight * 0.2, Infinity],
       // maxConstraints: [innerHeight * 0.75, Infinity],
       resizeHandles: ["e"],
+      onResizeStop: (event, data) => {
+        setWidth(data.size.width);
+      },
     };
   }
 
