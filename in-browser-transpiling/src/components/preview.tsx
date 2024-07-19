@@ -4,30 +4,36 @@ import "./preview.css";
 import { useEffect, useRef } from "react";
 
 const html = `
-<html style="width: 100%; height: 100%;">
-<head> </head>
-<body>
-  <div id="root" >
-    <script>
-      window.addEventListener(
-        "message",
-        (event) => {
-          try {
-            eval(event.data);
-          } catch (error) {
-            const root = document.querySelector("#root");
-            root.innerHTML =
-              '<div style="color:red;"><h4>Runtime error</h4>' +
-              error +
-              "</div>";
-            console.error(error);
-          }
-        },
-        false
-      );
-    </script>
-  </div>
-</body>
+<html style="width: 100%; height: 100%">
+  <head> </head>
+  <body>
+    <div id="root">
+      <script>
+        const handleError = (error) => {
+          const root = document.querySelector("#root");
+          root.innerHTML =
+            '<div style="color:red;"><h4>Runtime error</h4>' + error + "</div>";
+          console.error(error);
+        };
+
+        window.addEventListener("error", (event) => {
+          handleError(event.error);
+        });
+
+        window.addEventListener(
+          "message",
+          (event) => {
+            try {
+              eval(event.data);
+            } catch (error) {
+              handleError(error);
+            }
+          },
+          false
+        );
+      </script>
+    </div>
+  </body>
 </html>
 `;
 
