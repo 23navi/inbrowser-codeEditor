@@ -5,6 +5,13 @@
   flex-grow: 1;
 }
 
+.preview-error{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: red;
+}
+
 .iframe-wrapper iframe {
   height: 100%;
   width: 100%;

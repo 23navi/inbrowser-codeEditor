@@ -39,9 +39,10 @@ const html = `
 
 interface PreviewProps {
   code: string;
+  errMsg: string;
 }
 
-const Preview = ({ code }: PreviewProps) => {
+const Preview = ({ code, errMsg }: PreviewProps) => {
   const iframeRef = useRef<any>();
 
   useEffect(() => {
@@ -62,6 +63,7 @@ const Preview = ({ code }: PreviewProps) => {
         sandbox="allow-scripts"
         ref={iframeRef}
       />
+      {errMsg && <div className="preview-error">{errMsg}</div>}
     </div>
   );
 };

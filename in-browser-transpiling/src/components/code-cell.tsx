@@ -11,11 +11,13 @@ interface CodeCellProps {
 function CodeCell({ initialCode }: CodeCellProps) {
   const [input, setInput] = useState(initialCode);
   const [code, setCode] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      const bundledCode = await bundler(input);
-      setCode(bundledCode);
+      const bundledOutput = await bundler(input);
+      setCode(bundledOutput.code);
+      setError(bundledOutput.error);
     }, 2000);
 
     return () => {
@@ -34,7 +36,7 @@ function CodeCell({ initialCode }: CodeCellProps) {
             }}
           />
         </Resizable>
-        <Preview code={code} />
+        <Preview code={code} errMsg={error} />
       </div>
     </Resizable>
   );
