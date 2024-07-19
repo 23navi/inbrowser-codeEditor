@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import bundler from "../bundler";
 import CodeEditor from "./code-editor";
 import Preview from "./preview";
@@ -11,11 +11,19 @@ interface CodeCellProps {
 function CodeCell({ initialCode }: CodeCellProps) {
   const [input, setInput] = useState(initialCode);
   const [code, setCode] = useState("");
+  const [error, setError] = useState("");
 
-  const onClick = async () => {
-    const bundledCode = await bundler(input);
-    setCode(bundledCode);
-  };
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      const bundledOutput = await bundler(input);
+      setCode(bundledOutput.code);
+      setError(bundledOutput.error);
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [input]);
 
   return (
     <Resizable direction="vertical">
@@ -28,7 +36,7 @@ function CodeCell({ initialCode }: CodeCellProps) {
             }}
           />
         </Resizable>
-        <Preview code={code} />
+        <Preview code={code} errMsg={error} />
       </div>
     </Resizable>
   );
