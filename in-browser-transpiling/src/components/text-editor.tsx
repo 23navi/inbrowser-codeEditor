@@ -1,47 +1,52 @@
-import MDEditor from "@uiw/react-md-editor";
-import { useEffect, useRef, useState } from "react";
-import "./text-editor.css";
+import './text-editor.css';
+import { useState, useEffect, useRef } from 'react';
+import MDEditor from '@uiw/react-md-editor';
+import { Cell } from '../state';
+import { useActions } from '../hooks/use-actions';
 
-const TextEditor = () => {
-  const editorRef = useRef<HTMLDivElement | null>(null);
+interface TextEditorProps {
+  cell: Cell;
+}
 
+const TextEditor: React.FC<TextEditorProps> = ({ cell }) => {
+  const ref = useRef<HTMLDivElement | null>(null);
   const [editing, setEditing] = useState(false);
-  const [mdValue, setMdValue] = useState("");
+  const { updateCell } = useActions();
 
   useEffect(() => {
-    const clickListner = (event: MouseEvent) => {
+    const listener = (event: MouseEvent) => {
       if (
-        editorRef.current &&
+        ref.current &&
         event.target &&
-        editorRef.current.contains(event.target as Node)
+        ref.current.contains(event.target as Node)
       ) {
         return;
       }
+
       setEditing(false);
     };
-    document.addEventListener("click", clickListner, { capture: true });
+    document.addEventListener('click', listener, { capture: true });
 
     return () => {
-      document.removeEventListener("click", clickListner, { capture: true });
+      document.removeEventListener('click', listener, { capture: true });
     };
   }, []);
 
   if (editing) {
     return (
-      <div className="text-editor" ref={editorRef}>
+      <div className="text-editor" ref={ref}>
         <MDEditor
-          value={mdValue}
-          onChange={(changedValue) => {
-            setMdValue(changedValue || "");
-          }}
+          value={cell.content}
+          onChange={(v) => updateCell(cell.id, v || '')}
         />
       </div>
     );
   }
+
   return (
     <div className="text-editor card" onClick={() => setEditing(true)}>
       <div className="card-content">
-        <MDEditor.Markdown source={mdValue} />
+        <MDEditor.Markdown source={cell.content || 'Click to edit'} />
       </div>
     </div>
   );

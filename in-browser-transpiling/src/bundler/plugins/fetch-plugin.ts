@@ -1,19 +1,23 @@
-import * as esbuild from "esbuild-wasm";
-import axios from "axios";
-import localforage from "localforage";
+import * as esbuild from 'esbuild-wasm';
+import axios from 'axios';
+import localForage from 'localforage';
 
-const fileCache = localforage.createInstance({
-  name: "fileCache",
+const fileCache = localForage.createInstance({
+  name: 'filecache',
 });
 
-export const fetchPlugin = (userCode: string) => {
+export const fetchPlugin = (inputCode: string) => {
   return {
-    name: "fetch-plugin",
+    name: 'fetch-plugin',
     setup(build: esbuild.PluginBuild) {
-      build.onLoad({ filter: /.*/ }, async (args: any) => {
-        // This is the first onLoad which manages cache returns. It will only return if there is a cache hit, else it will let other onLoad take charge
+      build.onLoad({ filter: /(^index\.js$)/ }, () => {
+        return {
+          loader: 'jsx',
+          contents: inputCode,
+        };
+      });
 
-        // Check if the data is in the cache
+      build.onLoad({ filter: /.*/ }, async (args: any) => {
         const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
           args.path
         );
@@ -21,60 +25,40 @@ export const fetchPlugin = (userCode: string) => {
         if (cachedResult) {
           return cachedResult;
         }
-
-        return null;
       });
 
       build.onLoad({ filter: /.css$/ }, async (args: any) => {
-        // Fetch the data from unpkg.com. We need to fetch the data from unpkg.com because we are not using the cache.
         const { data, request } = await axios.get(args.path);
-
-        // this will be only used for css files. We need to return the contents of the css file.
-        const escapedData = data
-          .replace(/\n/g, "")
+        const escaped = data
+          .replace(/\n/g, '')
           .replace(/"/g, '\\"')
           .replace(/'/g, "\\'");
-
         const contents = `
-            const style = document.createElement('style');
-            style.innerText = '${escapedData}';
-            document.head.appendChild(style);
-            `;
+          const style = document.createElement('style');
+          style.innerText = '${escaped}';
+          document.head.appendChild(style);
+        `;
 
         const result: esbuild.OnLoadResult = {
-          loader: "jsx",
+          loader: 'jsx',
           contents,
-          resolveDir: new URL("./", request.responseURL).pathname,
+          resolveDir: new URL('./', request.responseURL).pathname,
         };
-
-        // Cache the result
         await fileCache.setItem(args.path, result);
 
-        // return the result
         return result;
       });
 
-      build.onLoad({ filter: /^index\.js$/ }, async (args: any) => {
-        return {
-          loader: "jsx",
-          contents: userCode,
-        };
-      });
-
       build.onLoad({ filter: /.*/ }, async (args: any) => {
-        // Fetch the data from unpkg.com. We need to fetch the data from unpkg.com because we are not using the cache.
         const { data, request } = await axios.get(args.path);
 
         const result: esbuild.OnLoadResult = {
-          loader: "jsx",
+          loader: 'jsx',
           contents: data,
-          resolveDir: new URL("./", request.responseURL).pathname,
+          resolveDir: new URL('./', request.responseURL).pathname,
         };
-
-        // Cache the result
         await fileCache.setItem(args.path, result);
 
-        // return the result
         return result;
       });
     },

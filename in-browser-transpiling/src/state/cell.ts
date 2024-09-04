@@ -1,7 +1,6 @@
-export type CellType = "code" | "text";
-
+export type CellTypes = 'code' | 'text';
 export interface Cell {
   id: string;
-  type: CellType;
-  contnet: string;
+  type: CellTypes;
+  content: string;
 }

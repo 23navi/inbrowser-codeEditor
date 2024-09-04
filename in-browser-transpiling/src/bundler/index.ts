@@ -1,38 +1,42 @@
-import * as esbuild from "esbuild-wasm";
-import { unpkgPathPlugin } from "./plugins/unpkg-path-plugin";
-import { fetchPlugin } from "./plugins/fetch-plugin";
+import * as esbuild from 'esbuild-wasm';
+import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
+import { fetchPlugin } from './plugins/fetch-plugin';
 
-// Initally this service will be undefined but after first run, it will be set to esbuild.startSerive()
-let service: esbuild.Service | undefined = undefined;
-
-const bundler = async (rawCode: string) => {
-  // we want to initialize service only once
+let service: esbuild.Service;
+const bundle = async (rawCode: string) => {
   if (!service) {
     service = await esbuild.startService({
       worker: true,
-      wasmURL: "/esbuild.wasm", // we have it in public folder
+      wasmURL: 'https://unpkg.com/esbuild-wasm@0.8.27/esbuild.wasm',
     });
   }
 
   try {
-    const buildResult = await service.build({
-      entryPoints: ["index.js"],
+    const result = await service.build({
+      entryPoints: ['index.js'],
       bundle: true,
       write: false,
       plugins: [unpkgPathPlugin(), fetchPlugin(rawCode)],
       define: {
-        "process.env.NODE_ENV": "'production'",
-        global: "window",
+        'process.env.NODE_ENV': '"production"',
+        global: 'window',
       },
     });
-    const outputCode = buildResult.outputFiles[0].text;
-    return { code: outputCode, error: "" };
-  } catch (error) {
-    if (error instanceof Error) {
-      return { code: "", error: error.message };
+
+    return {
+      code: result.outputFiles[0].text,
+      err: '',
+    };
+  } catch (err) {
+    if (err instanceof Error) {
+      return {
+        code: '',
+        err: err.message,
+      };
+    } else {
+      throw err;
     }
-    throw error;
   }
 };
 
-export default bundler;
+export default bundle;

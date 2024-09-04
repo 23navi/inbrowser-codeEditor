@@ -1,49 +1,59 @@
-import "./code-editor.css";
-import { useRef } from "react";
-import MonacoEditor from "@monaco-editor/react";
-// import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
-import type { EditorDidMount } from "@monaco-editor/react";
-import prettier from "prettier";
-import parser from "prettier/parser-babel";
-interface ICodeEditorProps {
+import './code-editor.css';
+import './syntax.css';
+import { useRef } from 'react';
+import MonacoEditor, { EditorDidMount } from '@monaco-editor/react';
+import prettier from 'prettier';
+import parser from 'prettier/parser-babel';
+import codeShift from 'jscodeshift';
+import Highlighter from 'monaco-jsx-highlighter';
+
+interface CodeEditorProps {
   initialValue: string;
-  onChange: (value: string) => void;
+  onChange(value: string): void;
 }
 
-const CodeEditor = ({ initialValue, onChange }: ICodeEditorProps) => {
-  const editorRef = useRef<any>(null); // Ref for editor
+const CodeEditor: React.FC<CodeEditorProps> = ({ onChange, initialValue }) => {
+  const editorRef = useRef<any>();
 
-  const onEditorDidMount: EditorDidMount = (
-    getValue, // a function which returns the value in the code editor. Signature of the function is () => string,
-    monacoEditor // a reference to the code editor. Type editor.IStandaloneCodeEditor
-  ): void => {
-    editorRef.current = monacoEditor; // Setting the ref for monacoEditor to be used in other part of code.
-
-    // This is the event listener which we are adding to our editor which on content change will call our onChange() with getValue(). getValue() returns the current data in the code editor
+  const onEditorDidMount: EditorDidMount = (getValue, monacoEditor) => {
+    editorRef.current = monacoEditor;
     monacoEditor.onDidChangeModelContent(() => {
       onChange(getValue());
-      // console.log(getValue());
     });
 
-    // Making the tab take 2 space insted of default 4
-    monacoEditor.getModel()?.updateOptions({ tabSize: 2 }); // directly updating options on the editor.
+    monacoEditor.getModel()?.updateOptions({ tabSize: 2 });
+
+    const highlighter = new Highlighter(
+      // @ts-ignore
+      window.monaco,
+      codeShift,
+      monacoEditor
+    );
+    highlighter.highLightOnDidChangeModelContent(
+      () => {},
+      () => {},
+      undefined,
+      () => {}
+    );
   };
 
   const onFormatClick = () => {
-    // Get the unformated code from the editor
-    const unformatedCode = editorRef.current.getModel()?.getValue();
+    // get current value from editor
+    const unformatted = editorRef.current.getModel().getValue();
 
-    // format the code using prettier
-    const formatedCode = prettier.format(unformatedCode, {
-      parser: "babel",
-      plugins: [parser],
-      useTabs: false,
-      singleQuote: true,
-      semi: true,
-    });
+    // format that value
+    const formatted = prettier
+      .format(unformatted, {
+        parser: 'babel',
+        plugins: [parser],
+        useTabs: false,
+        semi: true,
+        singleQuote: true,
+      })
+      .replace(/\n$/, '');
 
-    // set the codeEditor code to formated code
-    editorRef.current.setValue(formatedCode);
+    // set the formatted value back in the editor
+    editorRef.current.setValue(formatted);
   };
 
   return (
@@ -55,21 +65,20 @@ const CodeEditor = ({ initialValue, onChange }: ICodeEditorProps) => {
         Format
       </button>
       <MonacoEditor
-        editorDidMount={onEditorDidMount} // Will run when code editor is first mounted into the DOM
-        height="100%" // Default the editor will be of 0 height
-        language="javascript" // To give syntax highlighting and auto complete
-        theme="dark" // dark | light (default)
-        value={initialValue} //This is called value but it is only initial value.
-        // This is directly setting the monaco editor.
+        editorDidMount={onEditorDidMount}
+        value={initialValue}
+        theme="dark"
+        language="javascript"
+        height="100%"
         options={{
-          wordWrap: "on", // This will prevent code to overflow.
-          minimap: { enabled: false }, // Disable the small code preview on top right corner.
-          showUnused: false, // Disable unused code highlight.
-          folding: false, // Remove extra white space on left hand side before line number
-          lineNumbersMinChars: 3, // Reduce the gap between line number and start of code for that line
-          fontSize: 16, // Change the font size of editor
-          scrollBeyondLastLine: false, // This will prevent the editor from scrolling beyond last line.
-          automaticLayout: true, // This will automatically adjust the width of the editor on resizing of window
+          wordWrap: 'on',
+          minimap: { enabled: false },
+          showUnused: false,
+          folding: false,
+          lineNumbersMinChars: 3,
+          fontSize: 16,
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
         }}
       />
     </div>
