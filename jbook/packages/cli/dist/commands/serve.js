@@ -13,16 +13,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.serveCommand = void 0;
-const commander_1 = require("commander");
 const path_1 = __importDefault(require("path"));
+const commander_1 = require("commander");
+const local_api_1 = require("local-api");
+const isProduction = process.env.NODE_ENV === 'production';
 exports.serveCommand = new commander_1.Command()
-    .command("serve [filename]")
-    .description("Serve a notebook")
-    .option("-p, --port <number>", "Port number", "3000")
-    .option("-s, --silent", "Disable logging", false)
-    .option("-d, --debug", "Enable debug mode", false)
-    .action((...args_1) => __awaiter(void 0, [...args_1], void 0, function* (filename = "default.js", options) {
-    console.log(process.cwd());
-    console.log(path_1.default.dirname(filename));
-    console.log(path_1.default.join(process.cwd(), path_1.default.dirname(filename)));
+    .command('serve [filename]')
+    .description('Open a file for editing')
+    .option('-p, --port <number>', 'port to run server on', '4005')
+    .action((filename = 'notebook.js', options) => __awaiter(void 0, void 0, void 0, function* () {
+    const isLocalApiError = (err) => {
+        return typeof err.code === 'string';
+    };
+    try {
+        const dir = path_1.default.join(process.cwd(), path_1.default.dirname(filename));
+        yield (0, local_api_1.serve)(parseInt(options.port), path_1.default.basename(filename), dir, !isProduction);
+        console.log(`Opened ${filename}. Navigate to http://localhost:${options.port} to edit the file.`);
+    }
+    catch (err) {
+        if (isLocalApiError(err)) {
+            if (err.code === 'EADDRINUSE') {
+                console.error('Port is in use. Try running on a different port.');
+            }
+        }
+        else if (err instanceof Error) {
+            console.log('Heres the problem', err.message);
+        }
+        process.exit(1);
+    }
 }));
